@@ -1,0 +1,90 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<pthread.h>
+#define phil 5
+void *thread_func(int n);
+pthread_mutex_t cs[phil];
+void *thread_func(int n)
+{
+  int i;
+	for(i=0;i<5;i++)
+	{
+		sleep(1);
+		pthread_mutex_lock(&cs[n]);
+		pthread_mutex_lock(&cs[(n+1)%phil]);
+		printf("\nphilosopher %d is eating",n);
+		sleep(1);
+		printf("\nphilosopher %d has finished eating and is now thinking",n);
+		pthread_mutex_unlock(&cs[n]);
+		pthread_mutex_unlock(&cs[(n+1)%phil]);
+		sleep(1);
+	}
+	pthread_exit("\nExiting...");
+}
+int main()
+{
+	pthread_t a_thread[phil];
+	int i,k;
+	void *message;
+	for(i=0;i<phil;i++)
+	{
+		k=pthread_mutex_init(&cs[i],NULL);
+		if(k==-1)
+		{
+			printf("Mutex initialization failed");
+			exit(1);
+		}
+	}
+	for(i=0;i<phil;i++)
+	{
+		k=pthread_create(&a_thread[i],NULL,thread_func,(void *)i);
+		if(k!=0)
+		{
+			printf("Thread creation failed");
+			exit(0);
+		}
+	}
+	for(i=0;i<phil;i++)
+	{
+		k=pthread_join(a_thread[i],message);
+		if(k!=0)
+		{
+			printf("Thread joining failed");
+			exit(0);
+		}
+	}
+	exit(0);
+	printf("Threads joined successfully \n\t%s\n",(char *)message);
+	for(i=0;i<phil;i++)
+	{
+		k=pthread_mutex_destroy(&cs[i]);
+		if(k==-1)
+		{
+			printf("\nMutex destruction failed");
+			exit(1);
+		}
+	}
+	return(0);
+}
+
+
+
+
+
+Output obtained:-
+-----------------
+philosopher 1 is eating
+philosopher 3 is eating
+philosopher 1 has finished eating and is now thinking
+philosopher 3 has finished eating and is now thinking
+philosopher 2 is eating
+philosopher 0 is eating
+philosopher 2 has finished eating and is now thinking
+philosopher 0 has finished eating and is now thinking
+philosopher 4 is eating
+philosopher 1 is eating
+philosopher 4 has finished eating and is now thinking
+philosopher 3 is eating
+philosopher 1 has finished eating and is now thinking
+philosopher 0 is eating
+philosopher 3 has finished eating and is now thinking
