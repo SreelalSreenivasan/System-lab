@@ -1,0 +1,67 @@
+#include<stdio.h>
+#include<pthread.h>
+#include<semaphore.h>
+#include<stdlib.h>
+#define N 5
+int i=0;
+struct buffer
+{
+int b[N];
+sem_t empty,full;
+int in,out;
+}buf;
+void *P(void *arg)
+{
+int f;
+f = ((int) arg);
+while(1)
+{
+sem_wait(&(buf.empty));
+buf.b[buf.in]=i;
+buf.in=(buf.in+1)%N;
+printf("\nProducer %d produced:%d",f,i++);
+sem_post(&(buf.full));
+sleep(1);
+}
+}
+void *C(void *arg)
+{
+int item,f;
+f = ((int) arg);
+while(1)
+{
+sem_wait(&(buf.full));
+item=buf.b[buf.out];
+buf.out=(buf.out+1)%N;
+printf("\nConsumer %d consumed :%d",f,item);
+sem_post(&(buf.empty));
+sleep(3);
+}
+}
+main()
+{
+int j=0;
+pthread_t t1[5],t2[5];
+sem_init(&(buf.empty),0,N);
+sem_init(&(buf.full),0,0);
+buf.in=0;
+buf.out=0;
+for(j=0;j<3;j++)
+{
+pthread_create(&t1[j],NULL,P,(void *)j);
+pthread_create(&t2[j],NULL,C,(void *)j);
+}
+for(j=0;j<3;j++)
+{
+pthread_join(t1[j],NULL);
+pthread_join(t2[j],NULL);
+}
+}
+Output obtained:-
+-----------------
+Producer 2 produced:1
+Producer 0 produced:0
+Consumer 1 consumed :0
+Consumer 2 consumed :1
+Producer 1 produced:2
+Consumer 0 consumed :2
