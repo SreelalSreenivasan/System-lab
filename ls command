@@ -1,0 +1,24 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<dirent.h>
+int main(int argc,char *argv[])
+{
+  DIR *lan;
+	struct dirent *wan;
+	if(argc<2)
+		lan=opendir(".");
+	else
+		lan=opendir(argv[1]);
+	while(wan=readdir(lan))
+	{
+		if(wan->d_name[0]!=".")
+			printf("%s\t",wan->d_name);
+	}
+	closedir(lan);
+	printf("\n");
+	return 0;
+}
+
+Output obtained:-
+-----------------
+new.c	list.c~	Desktop	list.c	param.c~ a.out
